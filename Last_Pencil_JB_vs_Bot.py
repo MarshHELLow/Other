@@ -1,5 +1,6 @@
 import random
 
+#Check for correct input of the initial number of pencils
 def right_count():
     global count
     count = input()
@@ -14,6 +15,7 @@ def right_count():
         right_count()
     count = int(count)
 
+#Checking for the correct input of the name of the first player
 def right_name():
     global name
     name = input()
@@ -21,20 +23,21 @@ def right_name():
         print("Choose between User and Bot")
         right_name()
 
-def right_count_user():
+#Logic of the main game process
+def game():
     global count_user
     global count
     if name == "Bot":
         count_user = input()
         if count_user.isdigit() == False:
             print("Possible values: '1', '2' or '3'")
-            right_count_user()
+            game()
         if int(count_user) != 1 and int(count_user) != 2 and int(count_user) != 3:
             print("Possible values: '1', '2' or '3'")
-            right_count_user()
+            game()
         if int(count_user) > count:
             print("Too many pencils were taken")
-            right_count_user()
+            game()
         count_user = int(count_user)
     elif name == "User":
         if count % 4 == 0:
@@ -48,6 +51,7 @@ def right_count_user():
             count_user = random.randint(1, 3)
         print(count_user)
 
+#Checking for a winner
 def win():
     global name
     if count == 0:
@@ -57,7 +61,7 @@ def win():
             name = "User"
             print(f"{name}' won!")
 
-
+#Execution of the main program
 print("How many pencils would you like to use:")
 right_count()
 print("Who will be the first (User, Bot):")
@@ -70,7 +74,7 @@ while count > 0:
     else:
         print(f"{name}'s turn:")
         name = "Bot"
-    right_count_user()
+    game()
     count = count - count_user
     print("Remaining pencils on the playing field:")
     print("|" * count)
