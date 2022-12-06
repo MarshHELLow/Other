@@ -76,8 +76,9 @@ while count > 0:
         name = "Bot"
     game()
     count = count - count_user
-    print("Remaining pencils on the playing field:")
-    print("|" * count)
+    if count > 0:
+        print("Remaining pencils on the playing field:")
+        print("|" * count)
     win()
 
 
