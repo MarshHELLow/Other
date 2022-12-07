@@ -1,19 +1,20 @@
 import random
-print("H A N G M A N")
-words_base = ["python", "java", "swift", "javascript"]
-word_game = random.choice(words_base)
-word_secret = "-" * len(word_game)
-letters_view = set()
+
 health_point = 8
+print("H A N G M A N\n")
+words_base = ["python", "java", "swift", "javascript"]
+answer = random.choice(words_base)
+secret_word = list("-" * len(answer))
 
 while health_point != 0:
-    print(word_secret)
+    print(''.join(secret_word))
     player_letter = input("Input a letter: ")
-    if player_letter not in word_game:
+    if player_letter in answer:
+        for i in range(len(answer)):
+            if answer[i] == player_letter:
+                secret_word[i] = player_letter
+    else:
         print("That letter doesn't appear in the word.")
-        health_point -= 1
-    elif player_letter in word_game:
-        letters_view.update(player_letter)
-        word_secret[word_game.index(player_letter)] = player_letter
+    health_point -= 1
 
 print("Thanks for playing!")
