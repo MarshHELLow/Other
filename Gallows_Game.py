@@ -1,7 +1,7 @@
 import random
 
 health_point = 8
-words = ["python", "java", "swift", "javascript"]
+words = ["python", "java", "swift", "javascript", "programming", "jetbrains", "github", "freedom", "world"]
 count_won = 0
 count_lost = 0
 
