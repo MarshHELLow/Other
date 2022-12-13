@@ -1,3 +1,5 @@
+import time
+
 def welcome_bot(bot_name, birth_year):
     print("Hello! My name is " + bot_name + ".")
     print("I was created in " + birth_year + ".")
@@ -20,6 +22,7 @@ def bot_count():
     num = int(input())
     curr = 0
     while curr <= num:
+        time.sleep(0.7)
         print(curr)
         curr = curr + 1
 
