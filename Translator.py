@@ -1,35 +1,30 @@
 import requests
+import sys
 from bs4 import BeautifulSoup
 
-def choose_language():
-    global languages
-    languages = {1: "Arabic", 2: "German", 3: "English", 4: "Spanish", 5: "French", 6: "Hebrew", 7: "Japanese",
+def user_input():
+    global LANGUAGES
+    LANGUAGES = {1: "Arabic", 2: "German", 3: "English", 4: "Spanish", 5: "French", 6: "Hebrew", 7: "Japanese",
                  8: "Dutch", 9: "Polish", 10: "Portuguese", 11: "Romanian", 12: "Russian", 13: "Turkish"}
     print("Hello, welcome to the translator. Translator supports:\n")
-    for i, language in languages.items():
+    for i, language in LANGUAGES.items():
         print(f'{i}. {language}')
     first_language = int(input("\nType the number of your language: "))
     second_language = int(input("Type the number of language you want to translate to: "))
-    return first_language, second_language
-
-def choose_word():
     word = input("Type the word you want to translate: ")
-    return word
+    return first_language, second_language, word
 
 def create_url(first_language, second_language, word):
-    to_lang = str.lower(languages[second_language])
-    from_lang = str.lower(languages[first_language])
+    from_lang = str.lower(LANGUAGES[first_language])
+    to_lang = str.lower(LANGUAGES[second_language])
     url = f'https://context.reverso.net/translation/{from_lang}-{to_lang}/{word}'
     return url
 
-def get_url(gen_url, header):
-    return requests.get(gen_url, headers=header)
-
 def get_content(to_lang, from_lang, user_word):
+    global headers
     url = create_url(to_lang, from_lang, user_word)
-    user_agent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:74.0) Gecko/20100101 Firefox/74.0'
-    headers = {'User-Agent': user_agent}
-    response = get_url(url, headers)
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:74.0) Gecko/20100101 Firefox/74.0'}
+    response = requests.get(url, headers=headers)
     return response
 
 def parse_page(page):
@@ -41,7 +36,7 @@ def parse_page(page):
     return translation_list[3:8], example_list[:10]
 
 def print_results(translation_list, example_list, second_language):
-    print_lang = languages[second_language]
+    print_lang = LANGUAGES[second_language]
     print(f'\n{print_lang} Translations:')
     for word in translation_list:
         print(word)
@@ -55,10 +50,13 @@ def print_results(translation_list, example_list, second_language):
 
 
 def main():
-    language_in, language_out = choose_language()
-    word = choose_word()
+    language_in, language_out, word = user_input()
     page = get_content(language_in, language_out, word)
     translations, examples = parse_page(page)
     print_results(translations, examples, language_out)
 
-main()
+if __name__ == "__main__":
+    try:
+        main()
+    except Exception as e:
+        sys.exit(e)
