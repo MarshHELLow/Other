@@ -30,24 +30,17 @@ def get_content(to_lang, from_lang, user_word):
 def parse_page(page):
     soup = BeautifulSoup(page.content, 'html.parser')
     translations = soup.find_all('a', class_=lambda value: value and value.startswith("translation"))
-    translation_list = [word.get_text().strip() for word in translations]
-    examples = soup.select('#examples-content span.text')
-    example_list = [phrase.get_text().strip() for phrase in examples]
-    return translation_list[3:8], example_list[:10]
+    example_list = [phrase.get_text().strip() for phrase in soup.select('#examples-content span.text')]
+    return translations[3:8], example_list[:10]
 
-def print_results(translation_list, example_list, second_language):
+def print_results(translations, example_list, second_language):
     print_lang = LANGUAGES[second_language]
     print(f'\n{print_lang} Translations:')
-    for word in translation_list:
-        print(word)
+    for translation in translations:
+        print(translation.get_text().strip())
     print(f'\n{print_lang} Examples:')
-    pairs = []
-    for phrase in example_list:
-        if example_list.index(phrase) < len(example_list) - 1 and example_list.index(phrase) % 2 == 0:
-            pairs.append((example_list[example_list.index(phrase)], example_list[example_list.index(phrase) + 1]))
-    for pair in pairs:
-        print(f'{pair[0]}:\n{pair[1]}\n')
-
+    for first, second in zip(example_list[0::2], example_list[1::2]):
+        print(f'{first}:\n{second}\n')
 
 def main():
     language_in, language_out, word = user_input()
