@@ -1,55 +1,118 @@
-import requests
 import sys
+import requests
 from bs4 import BeautifulSoup
 
-def user_input():
-    global LANGUAGES
-    LANGUAGES = {1: "Arabic", 2: "German", 3: "English", 4: "Spanish", 5: "French", 6: "Hebrew", 7: "Japanese",
-                 8: "Dutch", 9: "Polish", 10: "Portuguese", 11: "Romanian", 12: "Russian", 13: "Turkish"}
-    print("Hello, welcome to the translator. Translator supports:\n")
-    for i, language in LANGUAGES.items():
-        print(f'{i}. {language}')
-    first_language = int(input("\nType the number of your language: "))
-    second_language = int(input("Type the number of language you want to translate to: "))
-    word = input("Type the word you want to translate: ")
-    return first_language, second_language, word
 
-def create_url(first_language, second_language, word):
-    from_lang = str.lower(LANGUAGES[first_language])
-    to_lang = str.lower(LANGUAGES[second_language])
-    url = f'https://context.reverso.net/translation/{from_lang}-{to_lang}/{word}'
-    return url
+class Translator:
+    def __init__(self):
+        self.languages = {
+            0: "All",
+            1: "Arabic",
+            2: "German",
+            3: "English",
+            4: "Spanish",
+            5: "French",
+            6: "Hebrew",
+            7: "Japanese",
+            8: "Dutch",
+            9: "Polish",
+            10: "Portuguese",
+            11: "Romanian",
+            12: "Russian",
+            13: "Turkish",
+        }
+        self.names = {"en": "English", "fr": "French"}
+        self.msg_0 = "Hello, welcome to the translator. Translator supports: "
+        self.msg_1 = "Type the number of your language: "
+        self.msg_2 = "Type the number of a language you want to translate to or '0' to translate to all languages: "
+        self.msg_3 = "Type the word you want to translate: "
+        self.headers = {"User-Agent": "Mozilla/5.0"}
+        self.base_url = "https://context.reverso.net/translation"
+        self.from_ = None
+        self.to_ = None
+        self.word = None
+        self.code = 0
+        self.r = None
+        self.translations = None
+        self.examples = None
+        self.filename = None
+        self.log = []
+        self.url = None
 
-def get_content(to_lang, from_lang, user_word):
-    global headers
-    url = create_url(to_lang, from_lang, user_word)
-    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:74.0) Gecko/20100101 Firefox/74.0'}
-    response = requests.get(url, headers=headers)
-    return response
+    def start(self):
+        self.get_inputs()
+        if len(self.to_) == 1:
+            self.translate(self.print_multiple)
+        elif len(self.to_) > 1:
+            self.translate(self.print_one)
+        with open(self.filename, "w") as f:
+            f.writelines(self.log)
 
-def parse_page(page):
-    soup = BeautifulSoup(page.content, 'html.parser')
-    translations = soup.find_all('a', class_=lambda value: value and value.startswith("translation"))
-    example_list = [phrase.get_text().strip() for phrase in soup.select('#examples-content span.text')]
-    return translations[3:8], example_list[:10]
+    def translate(self, printer):
+        for to_lang in self.to_:
+            self.make_url(self.from_, to_lang)
+            self.request_translation()
+            self.parse_html()
+            printer(to_lang)
 
-def print_results(translations, example_list, second_language):
-    print_lang = LANGUAGES[second_language]
-    print(f'\n{print_lang} Translations:')
-    for translation in translations:
-        print(translation.get_text().strip())
-    print(f'\n{print_lang} Examples:')
-    for first, second in zip(example_list[0::2], example_list[1::2]):
-        print(f'{first}:\n{second}\n')
+    @staticmethod
+    def extract_content(content_list):
+        return [item.text.strip() for item in content_list]
 
-def main():
-    language_in, language_out, word = user_input()
-    page = get_content(language_in, language_out, word)
-    translations, examples = parse_page(page)
-    print_results(translations, examples, language_out)
+    def get_inputs(self):
+        self.from_, self.to_, self.word = sys.argv[1], [sys.argv[2]], sys.argv[3]
+        if self.to_[0].lower() == "all":
+            self.to_ = [
+                self.languages[i]
+                for i in range(1, 14)
+                if self.languages[i].lower() != self.from_.lower()
+            ]
+        self.filename = f"{self.word}.txt"
+
+    def make_url(self, from_lang, to_lang):
+        self.url = f"{self.base_url}/{from_lang.lower()}-{to_lang.lower()}/{self.word}"
+
+    def request_translation(self):
+        code = 0
+        while code != 200:
+            self.r = requests.get(self.url, headers=self.headers)
+            code = self.r.status_code
+        self.code = code
+
+    def parse_html(self):
+        soup = BeautifulSoup(self.r.content, "html.parser")
+        self.translations = self.extract_content(
+            soup.find(id="translations-content").find_all(class_="display-term")
+        )
+        self.examples = self.extract_content(
+            soup.find(id="examples-content").find_all(class_="text")
+        )
+
+    def print_multiple(self, to_lang):
+        self.print(f"{to_lang} Translations:")
+        for word in self.translations:
+            self.print(word)
+        self.print()
+        self.print(f"{to_lang} Examples:", end="")
+        for i, example in enumerate(self.examples):
+            if i % 2 == 0:
+                self.print()
+            self.print(example)
+
+    def print_one(self, to_lang):
+        self.print(f"{to_lang} Translations:")
+        self.print(self.translations[0])
+        self.print()
+        self.print(f"{to_lang} Examples:")
+        self.print(self.examples[0])
+        self.print(self.examples[1])
+        self.print()
+
+    def print(self, msg="", end="\n"):
+        self.log.append(msg + end)
+        print(msg, end=end)
+
 
 if __name__ == "__main__":
-    try:
-        main()
-    except Exception as e:
-        sys.exit(e)
+    tr = Translator()
+    tr.start()
