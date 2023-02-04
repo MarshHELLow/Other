@@ -1,86 +1,38 @@
-import sys
-import requests
 from bs4 import BeautifulSoup
 
-url = 'https://context.reverso.net/translation/'
-user_agent = 'Mozilla/5.0'
-headers = {'User-Agent': user_agent}
-
-lang_list = ['arabic', 'german', 'english', 'spanish', 'french', 'hebrew', 'japanese',
-             'dutch', 'polish', 'portuguese', 'romanian', 'russian', 'turkish']
+import requests
 
 
-def output(language_2, translations, examples, output_num):
-    print(f'{language_2.title()} Translations:')
-    print(*translations[:output_num], sep='\n')
-
-    print(f'\n{language_2.title()} Examples:')
-    print(*examples[:output_num * 3], sep='\n')
-
-
-def export_to_file(word, language_2, translations, examples, output_num):
-    file_name = f'{word}.txt'
-    with open(file_name, 'a', encoding='utf-8') as file:
-        print(f'{language_2.title()} Translations:', file=file)
-        print(*translations[:output_num], file=file, sep='\n')
-
-        print(f'\n{language_2.title()} Examples:', file=file)
-        print(*examples[:output_num * 3], file=file, sep='\n')
-
-
-def parsing(trans_page):
-    r = requests.get(trans_page, headers=headers)
-    soup = BeautifulSoup(r.content, 'html.parser')
-
-    trans_tags = soup.find_all('span', {'class': 'display-term'})
-    examples_tags = soup.find('section', id="examples-content").find_all('span', class_="text")
-
-    translations = [t.text for t in trans_tags]
-    examples = [e.text.strip() for e in examples_tags]
-    i = 2
-    while i < len(examples):
-        examples.insert(i, ' ')
-        i += 3
-    return translations, examples
-
-
-def translation(from_, to_, word):
-    language_1 = from_
-    languages_2 = []
-    if to_ != 'all':
-        languages_2.append(to_)
-    else:
-        for lang in lang_list:
-            if lang != from_:
-                languages_2.append(lang)
-    for language_2 in languages_2:
-        if language_2 not in lang_list:
-            print(f"Sorry, the program doesn't support {language_2}")
-            sys.exit()
-        trans_page = f'{url}{language_1}-{language_2}/{word}'
-        translations, examples = parsing(trans_page)
-
-        if not translations or not examples:
-            print(f"Sorry, unable to find {word}")
-            continue
-
-        output_num = 1
-
-        output(language_2, translations, examples, output_num)
-        export_to_file(word, language_2, translations, examples, output_num)
+def translate(translate_from, translate_to, word):
+    url = f"https://context.reverso.net/translation/{translate_from.lower()}-{translate_to.lower()}/{word.lower()}"
+    response = requests.get(url, headers={'User-Agent': 'Mozilla/5.0'})
+    main_soup = BeautifulSoup(response.content, 'html.parser')
+    sentences_soup = main_soup.find("section", {"id": "examples-content"})
+    words = [i.text for i in main_soup.find_all("span", {"class": "display-term"})]
+    sentences = [i.text.strip() for i in sentences_soup.find_all("span", {"class": "text"})]
+    with open(word + ".txt", "a", encoding="utf-8") as word_file:
+        print(f"{translate_to} Translations:", words[0], f"\n{translate_to} Examples:", sep="\n", file=word_file)
+        print(sentences[0], sentences[1], "\n", sep="\n", file=word_file)
 
 
 def main():
-    from_ = sys.argv[1].lower()
-    to_ = sys.argv[2].lower()
-    word = sys.argv[3]
-
-    r = requests.get(url, headers=headers)
-    if r.status_code != 200:
-        print("Something went wrong with your internet connection")
-        sys.exit()
-
-    translation(from_, to_, word)
+    languages = {"1": "Arabic", "2": "German", "3": "English", "4": "Spanish", "5": "French",
+                 "6": "Hebrew", "7": "Japanese", "8": "Dutch", "9": "Polish", "10": "Portuguese",
+                 "11": "Romanian", "12": "Russian", "13": "Turkish"}
+    print("Hello, welcome to the translator. Translator supports:")
+    for n, language in languages.items():
+        print(f"{n}. {language}")
+    translate_from = languages[input("Type the number of your language:\n")]
+    user_number = input("Type the number of language you want to translate to:\n")
+    word = input('Type the word you want to translate:\n')
+    if user_number == "0":
+        for translate_to in languages.values():
+            if translate_to != translate_from:
+                translate(translate_from, translate_to, word)
+    else:
+        translate(translate_from, languages[user_number], word)
+    with open(word + ".txt", encoding="utf-8") as word_file:
+        print(word_file.read())
 
 
 if __name__ == "__main__":
