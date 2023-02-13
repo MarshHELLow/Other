@@ -1,13 +1,14 @@
 import random
 
 health_point = 8
-words = ["python", "java", "swift", "javascript", "programming", "jetbrains", "github", "freedom", "world"]
+words = ["python", "java", "swift", "javascript", "programming", "project", "answer", "language",
+         "jetbrains", "universe" "github", "freedom", "world", "country", "computer", "table"]
 count_won = 0
 count_lost = 0
 
+
 def start_menu():
-    global health_point, start_user, secret_word, set_letters, set_user_letters, answer
-    health_point = 8
+    global start_user, secret_word, set_letters, set_user_letters, answer
     answer = list(random.choice(words))
     secret_word = list("-" * len(answer))
     set_letters = set(answer)
@@ -24,6 +25,7 @@ def start_menu():
             return 0
     game()
 
+
 def check():
     global user_letter, set_user_letters
     if len(user_letter) != 1:
@@ -36,6 +38,7 @@ def check():
         print("You've already guessed this letter.")
         game()
 
+
 def win():
     global count_lost, count_won
     if secret_word.count('-') > 0:
@@ -46,6 +49,7 @@ def win():
         count_won += 1
         print(f"\nYou guessed the word {''.join(answer)}!\nYou survived!")
         start_menu()
+
 
 def game():
     global health_point, user_letter
@@ -63,6 +67,6 @@ def game():
             health_point -= 1
     win()
 
-def main():
-    start_menu()
-main()
+
+start_menu()
+
