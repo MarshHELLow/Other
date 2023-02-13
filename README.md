@@ -11,3 +11,6 @@ The game "Gallows" implemented in the Python command line. The game has a dictio
 
 4. Honest_Calculator.
 A calculator that allows the user to perform simple mathematical operations, save an intermediate result, and at the same time comment in every possible way on incorrect user actions. In this project, I learned to work with exceptions.
+
+5. Tic_Tac_Toe.
+Tic-tac-toe game written in Python. The game interface is made of symbols and implemented via the command line. The program has a menu through which the user can start the game, view the results or exit the program.
