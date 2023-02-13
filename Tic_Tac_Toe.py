@@ -7,13 +7,14 @@ board = [
     [lst[6], lst[7], lst[8]]
 ]
 
-def grid():
 
+def grid():
     print("---------")
     print(f"| {board[0][0]} {board[0][1]} {board[0][2]} |")
     print(f"| {board[1][0]} {board[1][1]} {board[1][2]} |")
     print(f"| {board[2][0]} {board[2][1]} {board[2][2]} |")
     print("---------")
+
 
 def line():
     global move
@@ -27,7 +28,6 @@ def line():
     dia2 = [board[0][2], board[1][1], board[2][0]]
     win_line = [row1, row2, row3, column1, column2, column3, dia1, dia2]
     win_list = [a[0] for a in win_line if a[0] == a[1] == a[2]]
-
     if win_list == ["X"]:
         print("X wins")
         exit()
@@ -38,15 +38,16 @@ def line():
         print("Draw")
         exit()
 
+
 grid()
 move = 1
 while True:
-    coor = input("Enter the coordinates: ")
-    n = [y for y in coor.split() if y.isalpha()]
+    player_turn = input("Enter the coordinates: ")
+    n = [y for y in player_turn.split() if y.isalpha()]
     if len(n) > 0:
         print("You should enter numbers!")
     else:
-        row, col = coor.split()
+        row, col = player_turn.split()
         row, col = int(row), int(col)
         if row > 3 or col > 3:
             print("Coordinates should be from 1 to 3!")
